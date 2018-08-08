@@ -22,7 +22,7 @@ public class RpcProxy {
     public <T> T create(final Class<?> interfaceClass) {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, ((proxy, method, args) -> {
             Request request = new Request();
-            request.setId(UUID.randomUUID().toString());
+            request.setId(UUID.randomUUID().toString().replaceAll("-", ""));
             request.setInterfaceName(method.getDeclaringClass().getName());
             request.setMethodName(method.getName());
             request.setParameterTypes(method.getParameterTypes());
@@ -42,6 +42,7 @@ public class RpcProxy {
             NettyClient nettyClient = new NettyClient(host, port);
             nettyClient.send(request);
             Response response = (Response)NettyClient.RESPONSE_MAP.get(request.getId());
+            NettyClient.RESPONSE_MAP.remove(request.getId());
             return response.getResult();
         }));
     }

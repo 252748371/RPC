@@ -13,6 +13,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -22,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NettyServer implements ApplicationContextAware {
+
+    private final static Logger log = LoggerFactory.getLogger(NettyServer.class);
 
     private final String host;
 
@@ -33,6 +37,7 @@ public class NettyServer implements ApplicationContextAware {
         this.host = host;
         this.port = port;
         this.registryService = registryService;
+        log.info("NettyServer host: "+host+" port: "+port);
     }
 
     private final EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("NettyServerBoss", true));
@@ -54,6 +59,7 @@ public class NettyServer implements ApplicationContextAware {
                 RpcService rpcService = serviceBean.getClass().getAnnotation(RpcService.class);
                 String serviceName = rpcService.value().getName();
                 RPCSERVICE_MAP.put(serviceName, serviceBean);
+                log.info("RPCSERVICE_MAP serviceName: "+serviceName+"                     serviceBean: "+ serviceBean);
             }
         }
 
@@ -85,7 +91,7 @@ public class NettyServer implements ApplicationContextAware {
             }
         }
 
-        future.addListener(f -> System.out.println("netty is bind "+host+":"+port));
+        future.addListener(f -> log.info("NettyServer is bind on "+host+":"+port));
     }
 
     @PreDestroy

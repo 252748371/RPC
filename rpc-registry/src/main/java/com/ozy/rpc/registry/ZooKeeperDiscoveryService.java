@@ -1,11 +1,15 @@
 package com.ozy.rpc.registry;
 
 import org.I0Itec.zkclient.ZkClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ZooKeeperDiscoveryService implements DiscoveryService {
+
+    private final static Logger log = LoggerFactory.getLogger(ZooKeeperDiscoveryService.class);
     private String zkAddress;
 
     public ZooKeeperDiscoveryService(String zkAddress) {
@@ -18,6 +22,7 @@ public class ZooKeeperDiscoveryService implements DiscoveryService {
     public String discover(String name) {
         // 创建 ZooKeeper 客户端
         ZkClient zkClient = new ZkClient(zkAddress, 5000, 5000);
+        log.info("zkAddress is " + zkAddress);
         try {
             // 获取 service 节点
             String servicePath = ZK_REGISTRY_PATH + "/" + name;
@@ -38,6 +43,7 @@ public class ZooKeeperDiscoveryService implements DiscoveryService {
             }
             // 获取 address 节点的值
             String addressPath = servicePath + "/" + address;
+            log.info("addressPath is "+addressPath);
             return zkClient.readData(addressPath);
         } finally {
             zkClient.close();
